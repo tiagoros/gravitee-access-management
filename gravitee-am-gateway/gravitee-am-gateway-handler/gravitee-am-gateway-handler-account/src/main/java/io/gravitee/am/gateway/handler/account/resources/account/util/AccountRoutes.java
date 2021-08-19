@@ -19,10 +19,15 @@ public enum AccountRoutes {
     INDEX("/"),
     STATIC_ASSETS("/assets/*"),
     PROFILE("/api/profile"),
-    FACTORS("/api/factors"),
     ACTIVITIES("/api/activity"),
     CHANGE_PASSWORD("/api/changePassword"),
-    CHANGE_PASSWORD_REDIRECT("/forgotPassword");
+    CHANGE_PASSWORD_REDIRECT("/forgotPassword"),
+    FACTORS("/api/factors"),
+    FACTORS_CATALOG("/api/factors/catalog"),
+    FACTORS_BY_ID("/api/factors/:factorId"),
+    FACTORS_OTP_QR("/api/account/api/factors/qr"),
+    FACTORS_VERIFY("/api/factors/:factorId}/verify");
+
 
     private String route;
 

@@ -552,6 +552,21 @@ public class User implements IUser {
         return factors;
     }
 
+    public void addFactor(EnrolledFactor factor){
+        if(Objects.isNull(factors)) factors = new ArrayList<>();
+        this.factors.add(factor);
+    }
+
+    public void upsertFactor(EnrolledFactor factor){
+        this.removeFactorById(factor.getFactorId());
+        this.addFactor(factor);
+    }
+
+    public void removeFactorById(String factorId){
+        if(Objects.isNull(factors)) return;
+        this.factors.removeIf(fact -> Objects.equals(fact.getFactorId(), factorId));
+    }
+
     public void setFactors(List<EnrolledFactor> factors) {
         this.factors = factors;
     }

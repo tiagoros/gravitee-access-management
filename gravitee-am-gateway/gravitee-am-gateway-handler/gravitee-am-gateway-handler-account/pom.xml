@@ -58,6 +58,42 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.gravitee.am.factor</groupId>
+            <artifactId>gravitee-am-factor-otp</artifactId>
+            <version>3.10.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.am.factor</groupId>
+            <artifactId>gravitee-am-factor-sms</artifactId>
+            <version>3.10.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.am.factor</groupId>
+            <artifactId>gravitee-am-factor-email</artifactId>
+            <version>3.10.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.am.factor</groupId>
+            <artifactId>gravitee-am-factor-api</artifactId>
+            <version>3.10.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.am.gateway.handler</groupId>
+            <artifactId>gravitee-am-gateway-handler-core</artifactId>
+            <version>3.10.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gravitee.am.common</groupId>
+            <artifactId>gravitee-am-common</artifactId>
+            <version>3.11.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

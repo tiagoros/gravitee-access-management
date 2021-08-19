@@ -13,14 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.gateway.handler.root.resources.endpoint.mfa;
+package io.gravitee.am.model.factor;
 
-/**
- * @author Eric LELEU (eric.leleu at graviteesource.com)
- * @author GraviteeSource Team
- */
-public interface FactorTypes {
-    String TYPE_TOTP = "TOTP";
-    String TYPE_SMS = "SMS";
-    String TYPE_EMAIL = "EMAIL";
+public enum FactorStatus {
+    PENDING_ACTIVATION, ACTIVATED, REVOKED, NULL;
 }

@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.gravitee.am.common.factor;
+package io.gravitee.am.gateway.handler.account.resources.account.util;
 
 import java.util.NoSuchElementException;
 
-public enum FactorType {
-    OTP("TOTP"),
-    SMS("SMS"),
-    EMAIL("EMAIL");
+public enum FactorAction {
+    ACTIVATE("activate"),
+    VERIFY("verify"),
+    CHALLENGE("challenge");
 
-    FactorType(String type) {
+    FactorAction(String type) {
         this.type = type;
     }
     private final String type;
 
-    public static FactorType getFactorTypeFromString(String type){
-        if (OTP.getType().equalsIgnoreCase(type) || "OTP".equalsIgnoreCase(type)) return OTP;
-        if (SMS.getType().equalsIgnoreCase(type)) return SMS;
-        if (EMAIL.getType().equalsIgnoreCase(type)) return EMAIL;
-        throw new NoSuchElementException(String.format("No factor type for provided string of %s", type));
+    public static FactorAction getFactorActionByType(String type){
+        if (ACTIVATE.getType().equalsIgnoreCase(type)) return ACTIVATE;
+        if (VERIFY.getType().equalsIgnoreCase(type)) return VERIFY;
+        if (CHALLENGE.getType().equalsIgnoreCase(type)) return CHALLENGE;
+        throw new NoSuchElementException(String.format("No factor action for provided type of %s", type));
     }
 
     public String getType() {

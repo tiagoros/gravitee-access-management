@@ -16,6 +16,7 @@
 package io.gravitee.am.gateway.handler.root.resources.endpoint.mfa;
 
 import io.gravitee.am.common.factor.FactorSecurityType;
+import io.gravitee.am.common.factor.FactorType;
 import io.gravitee.am.factor.api.Enrollment;
 import io.gravitee.am.factor.api.FactorProvider;
 import io.gravitee.am.gateway.handler.common.utils.ConstantKeys;
@@ -191,13 +192,13 @@ public class MFAEnrollEndpoint implements Handler<RoutingContext>  {
     private EnrolledFactor getSecurityFactor(MultiMap params, io.gravitee.am.model.Factor factor) {
         EnrolledFactor enrolledFactor = new EnrolledFactor();
         switch (factor.getFactorType()) {
-            case FactorTypes.TYPE_TOTP:
+            case OTP:
                 enrolledFactor.setSecurity(new EnrolledFactorSecurity(FactorSecurityType.SHARED_SECRET, params.get("sharedSecret")));
                 break;
-            case FactorTypes.TYPE_SMS:
+            case SMS:
                 enrolledFactor.setChannel(new EnrolledFactorChannel(EnrolledFactorChannel.Type.SMS, params.get("phone")));
                 break;
-            case FactorTypes.TYPE_EMAIL:
+            case EMAIL:
                 enrolledFactor.setSecurity(new EnrolledFactorSecurity(FactorSecurityType.SHARED_SECRET, params.get("sharedSecret")));
                 enrolledFactor.setChannel(new EnrolledFactorChannel(EnrolledFactorChannel.Type.EMAIL, params.get("email")));
                 break;
@@ -240,7 +241,7 @@ public class MFAEnrollEndpoint implements Handler<RoutingContext>  {
         public Factor(io.gravitee.am.model.Factor factor, Enrollment enrollment) {
             this.id = factor.getId();
             this.name = factor.getName();
-            this.factorType = factor.getFactorType();
+            this.factorType = factor.getFactorType().getType();
             this.enrollment = enrollment;
         }
 

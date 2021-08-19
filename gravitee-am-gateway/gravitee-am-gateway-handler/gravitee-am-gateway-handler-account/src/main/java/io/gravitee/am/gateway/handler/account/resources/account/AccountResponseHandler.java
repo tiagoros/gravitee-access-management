@@ -15,14 +15,30 @@
  */
 package io.gravitee.am.gateway.handler.account.resources.account;
 
+import io.gravitee.am.common.factor.FactorDataKeys;
+import io.gravitee.am.common.factor.FactorType;
+import io.gravitee.am.factor.api.Enrollment;
+import io.gravitee.am.gateway.handler.common.utils.ConstantKeys;
+import io.gravitee.am.gateway.handler.root.resources.endpoint.mfa.FactorTypes;
+import io.gravitee.am.model.Factor;
 import io.gravitee.am.model.User;
+import io.gravitee.am.model.factor.EnrolledFactor;
+import io.gravitee.am.model.factor.EnrolledFactorChannel;
+import io.gravitee.am.model.factor.EnrolledFactorSecurity;
 import io.gravitee.common.http.HttpHeaders;
 import io.gravitee.common.http.MediaType;
+import io.gravitee.common.util.Maps;
+import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.http.HttpServerResponse;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.gravitee.am.common.factor.FactorSecurityType.SHARED_SECRET;
 
 public class AccountResponseHandler {
 
@@ -69,5 +85,34 @@ public class AccountResponseHandler {
 
     private static String getTemporaryWipResponseJson() {
         return new JsonObject().put("temp", "true").put("reason", "wip").toString();
+    }
+
+    public static void handleNoBodyResponse(RoutingContext routingContext) {
+        routingContext.response().setStatusCode(204).end();
+    }
+
+    public static Handler<RoutingContext> handleEnrollNeedChallenge(RoutingContext routingContext, Factor factor, User user) {
+        return routingContext1 -> {
+            JsonObject enrollmentJson = new JsonObject();
+            FactorType factorType = factor.getFactorType();
+            switch (factor.getFactorType()) {
+                case OTP:
+                    AccountResponseHandler.handleUpdateUserResponse(routingContext,"Invalid MFA Enrollment State OTP factors do not need enrollment responses", 500);
+                    break;
+                case SMS:
+                    AccountResponseHandler.handleDefaultResponse(routingContext,enrollmentJson.put("factorId", factor.getId()).put("account", new JsonObject().put("phoneNumber", routingContext.session().get(ConstantKeys.ENROLLED_FACTOR_PHONE_NUMBER))));
+                    break;
+                case EMAIL:
+                    AccountResponseHandler.handleDefaultResponse(routingContext, enrollmentJson.put("factorId", factor.getId()).put("account", new JsonObject().put("email", routingContext.session().get(ConstantKeys.ENROLLED_FACTOR_EMAIL_ADDRESS))));
+                    break;
+                default:
+                    AccountResponseHandler.handleUpdateUserResponse(routingContext,"Unexpected MFA type: " + factor.getFactorType(), 500);
+                    throw new IllegalStateException("Unexpected MFA type: " + factor.getFactorType());
+            }
+        };
+    }
+
+    public static Handler<RoutingContext> handleEnrollNoChallenge(RoutingContext routingContext, Factor factor) {
+        return routingContext1 -> AccountResponseHandler.handleDefaultResponse(routingContext, new JsonObject().put("factorId", factor.getId()));
     }
 }

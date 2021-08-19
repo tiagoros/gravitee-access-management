@@ -263,15 +263,15 @@ public class MFAChallengeEndpoint implements Handler<RoutingContext> {
             EnrolledFactor enrolledFactor = new EnrolledFactor();
             enrolledFactor.setFactorId(factor.getId());
             switch (factor.getFactorType()) {
-                case FactorTypes.TYPE_TOTP:
+                case OTP:
                     enrolledFactor.setSecurity(new EnrolledFactorSecurity(SHARED_SECRET,
                             routingContext.session().get(ConstantKeys.ENROLLED_FACTOR_SECURITY_VALUE_KEY)));
                     break;
-                case FactorTypes.TYPE_SMS:
+                case SMS:
                     enrolledFactor.setChannel(new EnrolledFactorChannel(EnrolledFactorChannel.Type.SMS,
                             routingContext.session().get(ConstantKeys.ENROLLED_FACTOR_PHONE_NUMBER)));
                     break;
-                case FactorTypes.TYPE_EMAIL:
+                case EMAIL:
                     Map<String, Object> additionalData = new Maps.MapBuilder(new HashMap())
                         .put(FactorDataKeys.KEY_MOVING_FACTOR, generateInitialMovingFactor(endUser))
                         .build();
