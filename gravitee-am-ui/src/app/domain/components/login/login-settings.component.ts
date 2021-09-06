@@ -96,4 +96,16 @@ export class LoginSettingsComponent implements OnInit, OnChanges {
   isHideFormEnabled() {
     return this.loginSettings && this.loginSettings.hideForm;
   }
+
+  enableTwoStepLogin(event) {
+    this.loginSettings.twoStepLoginEnabled = event.checked;
+    if (event.checked) {
+      this.loginSettings.hideForm = !event.checked;
+    }
+    this.formChanged = true;
+  }
+
+  isTwoStepLoginEnabled() {
+    return this.loginSettings && this.loginSettings.twoStepLoginEnabled;
+  }
 }

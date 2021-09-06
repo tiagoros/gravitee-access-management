@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.gravitee.am.gateway.handler.common.vertx.utils.UriBuilderRequest.CONTEXT_PATH;
 
@@ -123,11 +122,11 @@ public class LoginEndpoint implements Handler<RoutingContext> {
         data.putAll(routingContext.data());
         data.putAll(botDetectionManager.getTemplateVariables(domain, client));
 
-        final List<IdentityProvider> providers = (List<IdentityProvider>)data.get(LoginSocialAuthenticationHandler.SOCIAL_PROVIDER_CONTEXT_KEY);
+        final List<IdentityProvider> providers = (List<IdentityProvider>) data.get(LoginSocialAuthenticationHandler.SOCIAL_PROVIDER_CONTEXT_KEY);
         if (providers != null && Boolean.TRUE.equals(data.get(HIDE_FORM_CONTEXT_KEY))) {
             if (providers.size() == 1) {
                 // hide login form enabled and only one IdP configured, redirect to the IdP login page
-                Map<String, String> urls = (Map<String, String>)data.get(LoginSocialAuthenticationHandler.SOCIAL_AUTHORIZE_URL_CONTEXT_KEY);
+                Map<String, String> urls = (Map<String, String>) data.get(LoginSocialAuthenticationHandler.SOCIAL_AUTHORIZE_URL_CONTEXT_KEY);
                 String redirectUrl = urls.get(providers.get(0).getId());
                 routingContext.response()
                         .putHeader(io.vertx.core.http.HttpHeaders.LOCATION, redirectUrl)

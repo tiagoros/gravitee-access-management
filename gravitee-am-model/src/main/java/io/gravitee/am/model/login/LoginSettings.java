@@ -48,6 +48,10 @@ public class LoginSettings {
      * Enable/Disable hide login form
      */
     private boolean hideForm;
+    /**
+     * Enable/Disable 2-step login
+     */
+    private boolean twoStepLoginEnabled;
 
     public LoginSettings() {
     }
@@ -58,7 +62,8 @@ public class LoginSettings {
         this.registerEnabled = other.registerEnabled;
         this.rememberMeEnabled = other.rememberMeEnabled;
         this.passwordlessEnabled = other.passwordlessEnabled;
-        this.hideForm = other.hideForm;
+        this.hideForm = !other.twoStepLoginEnabled && other.hideForm;
+        this.twoStepLoginEnabled = other.twoStepLoginEnabled;
     }
 
     public boolean isInherited() {
@@ -107,6 +112,14 @@ public class LoginSettings {
 
     public void setHideForm(boolean hideForm) {
         this.hideForm = hideForm;
+    }
+
+    public boolean isTwoStepLoginEnabled() {
+        return twoStepLoginEnabled;
+    }
+
+    public void setTwoStepLoginEnabled(boolean twoStepLoginEnabled) {
+        this.twoStepLoginEnabled = twoStepLoginEnabled;
     }
 
     public static LoginSettings getInstance(Domain domain, Client client) {
