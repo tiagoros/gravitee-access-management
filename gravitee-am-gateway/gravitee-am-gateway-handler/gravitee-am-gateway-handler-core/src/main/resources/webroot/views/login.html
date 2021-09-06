@@ -34,7 +34,7 @@
                             <label for="username">Username</label>
                             <input type="text" id="username" name="username" autofocus="autofocus" required />
                         </div>
-                        <div class="input-textfield">
+                        <div th:if="${!twoStepLoginEnabled}" class="input-textfield">
                             <label for="password">Password</label>
                             <input type="password" id="password" name="password" required />
                         </div>
@@ -57,7 +57,7 @@
                         <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Sign in</button>
                     </div>
                     <div class="login-form-additional-actions">
-                        <div th:if="${allowForgotPassword}">
+                        <div th:if="${allowForgotPassword && !twoStepLoginEnabled}">
                             <a th:href="${forgotPasswordAction}">Forgot Password ?</a>
                         </div>
                         <div th:if="${allowRegister}">
@@ -73,7 +73,7 @@
                         <h6 class="text">or Sign in with</h6>
                         <hr>
                     </div>
-                    <div class="mdl-social-button">
+                    <div th:if="${!twoStepLoginEnabled}" class="mdl-social-button">
                         <a th:href="${authorizeUrls.get(socialProvider.getId())}"
                            th:class="'mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect btn-' + ${socialProvider.getType()}"
                            th:each="socialProvider : ${socialProviders}">

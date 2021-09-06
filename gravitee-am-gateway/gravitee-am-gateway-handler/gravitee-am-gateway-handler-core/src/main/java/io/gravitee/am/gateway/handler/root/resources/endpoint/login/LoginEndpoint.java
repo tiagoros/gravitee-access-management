@@ -37,11 +37,13 @@ import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static io.gravitee.am.gateway.handler.common.utils.ConstantKeys.ACTION_KEY;
 import static io.gravitee.am.gateway.handler.common.vertx.utils.UriBuilderRequest.CONTEXT_PATH;
+import static io.gravitee.am.gateway.handler.root.resources.handler.login.LoginSocialAuthenticationHandler.SOCIAL_AUTHORIZE_URL_CONTEXT_KEY;
+import static io.gravitee.am.gateway.handler.root.resources.handler.login.LoginSocialAuthenticationHandler.SOCIAL_PROVIDER_CONTEXT_KEY;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -54,6 +56,7 @@ public class LoginEndpoint implements Handler<RoutingContext> {
     private static final String ALLOW_REGISTER_CONTEXT_KEY = "allowRegister";
     private static final String ALLOW_PASSWORDLESS_CONTEXT_KEY = "allowPasswordless";
     private static final String HIDE_FORM_CONTEXT_KEY = "hideLoginForm";
+    private static final String TWO_STEP_LOGIN_CONTEXT_KEY = "twoStepLoginEnabled";
     private static final String REQUEST_CONTEXT_KEY = "request";
     private static final String FORGOT_ACTION_KEY = "forgotPasswordAction";
     private static final String REGISTER_ACTION_KEY = "registerAction";
@@ -72,11 +75,7 @@ public class LoginEndpoint implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext routingContext) {
         final Client client = routingContext.get(ConstantKeys.CLIENT_CONTEXT_KEY);
-
-        // prepare context
         prepareContext(routingContext, client);
-
-        // render login page
         renderLoginPage(routingContext, client);
     }
 
@@ -87,10 +86,14 @@ public class LoginEndpoint implements Handler<RoutingContext> {
         routingContext.put(ConstantKeys.DOMAIN_CONTEXT_KEY, domain);
         // put login settings in context data
         LoginSettings loginSettings = LoginSettings.getInstance(domain, client);
-        routingContext.put(ALLOW_FORGOT_PASSWORD_CONTEXT_KEY, loginSettings != null && loginSettings.isForgotPasswordEnabled());
-        routingContext.put(ALLOW_REGISTER_CONTEXT_KEY, loginSettings != null && loginSettings.isRegisterEnabled());
-        routingContext.put(ALLOW_PASSWORDLESS_CONTEXT_KEY, loginSettings != null && loginSettings.isPasswordlessEnabled());
-        routingContext.put(HIDE_FORM_CONTEXT_KEY, loginSettings != null && loginSettings.isHideForm());
+        var optionalSettings = ofNullable(loginSettings).filter(Objects::nonNull);
+        boolean isTwoStepLoginEnabled = optionalSettings.map(LoginSettings::isTwoStepLoginEnabled).orElse(false);
+
+        routingContext.put(ALLOW_FORGOT_PASSWORD_CONTEXT_KEY, optionalSettings.map(LoginSettings::isForgotPasswordEnabled).orElse(false));
+        routingContext.put(ALLOW_REGISTER_CONTEXT_KEY, optionalSettings.map(LoginSettings::isRegisterEnabled).orElse(false));
+        routingContext.put(ALLOW_PASSWORDLESS_CONTEXT_KEY, optionalSettings.map(LoginSettings::isPasswordlessEnabled).orElse(false));
+        routingContext.put(HIDE_FORM_CONTEXT_KEY, optionalSettings.map(LoginSettings::isHideForm).orElse(false));
+        routingContext.put(TWO_STEP_LOGIN_CONTEXT_KEY, isTwoStepLoginEnabled);
 
         // put request in context
         EvaluableRequest evaluableRequest = new EvaluableRequest(new VertxHttpServerRequest(routingContext.request().getDelegate(), true));
@@ -110,23 +113,23 @@ public class LoginEndpoint implements Handler<RoutingContext> {
 
         // create post action url.
         final MultiMap queryParams = RequestUtils.getCleanedQueryParams(routingContext.request());
-        routingContext.put(ConstantKeys.ACTION_KEY, UriBuilderRequest.resolveProxyRequest(routingContext.request(), routingContext.request().path(), queryParams, true));
+        final String actionPath = isTwoStepLoginEnabled ? routingContext.get(CONTEXT_PATH) + "/2step/login" : routingContext.request().path();
+        routingContext.put(ACTION_KEY, UriBuilderRequest.resolveProxyRequest(routingContext.request(), actionPath, queryParams, true));
         routingContext.put(FORGOT_ACTION_KEY, UriBuilderRequest.resolveProxyRequest(routingContext.request(), routingContext.get(CONTEXT_PATH) + "/forgotPassword", queryParams, true));
         routingContext.put(REGISTER_ACTION_KEY, UriBuilderRequest.resolveProxyRequest(routingContext.request(), routingContext.get(CONTEXT_PATH) + "/register", queryParams, true));
         routingContext.put(WEBAUTHN_ACTION_KEY, UriBuilderRequest.resolveProxyRequest(routingContext.request(), routingContext.get(CONTEXT_PATH) + "/webauthn/login", queryParams, true));
     }
 
     private void renderLoginPage(RoutingContext routingContext, Client client) {
-        // render the login page
         final Map<String, Object> data = new HashMap<>();
         data.putAll(routingContext.data());
         data.putAll(botDetectionManager.getTemplateVariables(domain, client));
 
-        final List<IdentityProvider> providers = (List<IdentityProvider>) data.get(LoginSocialAuthenticationHandler.SOCIAL_PROVIDER_CONTEXT_KEY);
+        final List<IdentityProvider> providers = (List<IdentityProvider>) data.get(SOCIAL_PROVIDER_CONTEXT_KEY);
         if (providers != null && Boolean.TRUE.equals(data.get(HIDE_FORM_CONTEXT_KEY))) {
             if (providers.size() == 1) {
                 // hide login form enabled and only one IdP configured, redirect to the IdP login page
-                Map<String, String> urls = (Map<String, String>) data.get(LoginSocialAuthenticationHandler.SOCIAL_AUTHORIZE_URL_CONTEXT_KEY);
+                Map<String, String> urls = (Map<String, String>) data.get(SOCIAL_AUTHORIZE_URL_CONTEXT_KEY);
                 String redirectUrl = urls.get(providers.get(0).getId());
                 routingContext.response()
                         .putHeader(io.vertx.core.http.HttpHeaders.LOCATION, redirectUrl)

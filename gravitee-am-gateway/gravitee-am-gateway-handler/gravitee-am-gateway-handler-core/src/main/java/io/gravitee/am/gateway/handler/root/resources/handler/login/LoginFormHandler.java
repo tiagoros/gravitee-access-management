@@ -21,6 +21,8 @@ import io.gravitee.am.gateway.handler.common.utils.ConstantKeys;
 import io.gravitee.am.gateway.handler.common.vertx.utils.RequestUtils;
 import io.gravitee.am.gateway.handler.common.vertx.web.auth.provider.UserAuthProvider;
 import io.gravitee.am.gateway.handler.common.vertx.web.auth.user.User;
+import io.gravitee.am.model.login.LoginSettings;
+import io.gravitee.am.service.exception.NotImplementedException;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.gravitee.am.gateway.handler.common.utils.ConstantKeys.PASSWORD_PARAM_KEY;
 import static io.gravitee.am.gateway.handler.common.utils.ConstantKeys.USERNAME_PARAM_KEY;
+import static java.util.Objects.isNull;
 
 /**
  * @author Titouan COMPIEGNE (titouan.compiegne at graviteesource.com)
@@ -42,15 +45,21 @@ public class LoginFormHandler implements Handler<RoutingContext> {
     private static final Logger logger = LoggerFactory.getLogger(LoginFormHandler.class);
 
     private final UserAuthProvider authProvider;
+    private final LoginSettings loginSettings;
 
-    public LoginFormHandler(UserAuthProvider authProvider) {
+    public LoginFormHandler(LoginSettings domain, UserAuthProvider authProvider) {
         this.authProvider = authProvider;
+        this.loginSettings = domain;
     }
 
     @Override
     public void handle(RoutingContext context) {
         HttpServerRequest req = context.request();
-        if (req.method() != HttpMethod.POST) {
+        boolean twoStepLoginEnabled = loginSettings.isTwoStepLoginEnabled();
+        if (twoStepLoginEnabled) {
+            logger.warn("2step login is enabled - please use the correct handler.");
+            context.fail(404);
+        } else if (req.method() != HttpMethod.POST) {
             context.fail(405); // Must be a POST
         } else {
             if (!req.isExpectMultipart()) {

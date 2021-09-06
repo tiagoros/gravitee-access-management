@@ -231,9 +231,10 @@ public class RootProvider extends AbstractService<ProtocolProvider> implements P
         rootRouter.post(PATH_LOGIN)
                 .handler(clientRequestParseHandler)
                 .handler(botDetectionHandler)
-                .handler(new LoginFormHandler(userAuthProvider))
+                .handler(new LoginFormHandler(domain.getLoginSettings(), userAuthProvider))
                 .handler(policyChainHandler.create(ExtensionPoint.POST_LOGIN))
                 .handler(new LoginPostEndpoint());
+
         rootRouter.route(PATH_LOGIN)
                 .failureHandler(new LoginFailureHandler(authenticationFlowContextService));
 
