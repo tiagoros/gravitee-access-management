@@ -37,6 +37,7 @@ public enum Template {
     COMPLETE_PROFILE("complete_profile", "/completeProfile"),
     WEBAUTHN_REGISTER("webauthn_register", "/webauthn/register"),
     WEBAUTHN_LOGIN("webauthn_login", "/webauthn/login"),
+    TWO_STEP_LOGIN("twostep_login", "/2step/login"),
     ERROR("error", "/error");
 
     private final String template;

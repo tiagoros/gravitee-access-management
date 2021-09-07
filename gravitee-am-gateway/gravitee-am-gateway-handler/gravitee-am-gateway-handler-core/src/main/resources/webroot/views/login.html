@@ -68,12 +68,12 @@
                         </div>
                     </div>
                 </form>
-                <div th:if="${socialProviders and !socialProviders.empty}" class="social-login-buttons">
+                <div th:if="${!twoStepLoginEnabled && socialProviders and !socialProviders.empty}" class="social-login-buttons">
                     <div th:if="${!hideLoginForm}" class="signup-or-separator">
                         <h6 class="text">or Sign in with</h6>
                         <hr>
                     </div>
-                    <div th:if="${!twoStepLoginEnabled}" class="mdl-social-button">
+                    <div class="mdl-social-button">
                         <a th:href="${authorizeUrls.get(socialProvider.getId())}"
                            th:class="'mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect btn-' + ${socialProvider.getType()}"
                            th:each="socialProvider : ${socialProviders}">
